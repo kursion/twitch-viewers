@@ -12,12 +12,17 @@ namespace TwitchViewers
 {
     public class Crawler
     {
-        private int PAUSE = 10000;
+        private int PAUSE_FAILED = 15000;
+        private int PAUSE_SUCCESS = 30000;
+        private bool success = false;
         private Window form = null;
+        private String originalTitle = "";
         
+
         public Crawler(Window form)
         {
             this.form = form;
+            this.originalTitle = form.Text;
         }
 
         public void Start()
@@ -27,9 +32,25 @@ namespace TwitchViewers
                 String viewers = getViewers(username);
                 Console.WriteLine(username + " " + viewers);
                 this.setViewers(viewers);
-                Thread.Sleep(this.PAUSE);
+                if (this.success) {
+                  this.Pause(this.PAUSE_SUCCESS);
+                } else {
+                  this.Pause(this.PAUSE_FAILED);
+                }
             }
             
+        }
+
+        private void Pause(int pause) {
+          int counter = pause / 1000;
+          while (counter-- > 0) {
+            this.setTitle(this.originalTitle + " (PAUSE: " + counter + " secs)");
+            Thread.Sleep(1000);
+          }
+        }
+
+        private void setTitle(String title) {
+          this.form.setTitle(title);
         }
 
         private String getUsername()
@@ -51,9 +72,17 @@ namespace TwitchViewers
             Match match = regex.Match(viewers);
             if (match.Success)
             {
+                this.success = true;
                 return match.Groups[1].ToString();
+
             }
-            return "0 (failed)";
+            else if (viewers.Equals("")) 
+            {
+              this.success = false;
+              return "0 (failed)";
+            }
+            this.success = false;
+            return "not connected";
         }
 
         // Returns JSON string

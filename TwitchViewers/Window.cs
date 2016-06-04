@@ -42,6 +42,15 @@ namespace TwitchViewers
             }
         }
 
+        public void setTitle(string title) {
+          if (this.viewersField.InvokeRequired) {
+            SetTextCallback d = new SetTextCallback(setTitle);
+            this.Invoke(d, new object[] { title });
+          } else {
+            this.Text = title;
+          }
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
 
